@@ -22,6 +22,7 @@ This project focuses on the infrastructure and operational side of LLM inference
 * Add distributed tracing using OpenTelemetry and Tempo
 * Configure alerting using Prometheus Alert Rules and Alertmanager
 * Perform smoke, load, and stress testing using k6
+* Benchmark serving configurations (precision, quantization) for latency, throughput, and cost tradeoffs
 * Package Kubernetes deployments using Helm
 * Build CI/CD workflows using Bitbucket Pipelines
 
@@ -413,6 +414,57 @@ Pushes the system beyond expected traffic levels to identify bottlenecks and fai
 
 ---
 
+## Benchmarks & Cost Analysis
+
+The `benchmarks/` directory extends load testing into a repeatable
+comparison across serving configurations, answering not just "does it
+work under load" but "which configuration gives the best latency,
+throughput, and $/1M tokens tradeoff."
+
+```text
+Deploy configuration (e.g. vllm-fp16, vllm-awq)
+        │
+        ▼
+Smoke test
+        │
+        ▼
+k6 benchmark at stepped concurrency (1 → 2 → 4 → 8 ...)
+        │
+        ▼
+GPU metrics sampled during the run
+        │
+        ▼
+results/<config-name>.json
+        │
+        ▼
+reports/cost-latency-tradeoff.md
+```
+
+Configurations currently defined:
+
+* **vllm-fp16** — baseline precision, matches the default deployment
+* **vllm-awq** — 4-bit AWQ quantization, testing whether the smaller
+  memory footprint converts into higher concurrency and throughput
+
+Run a benchmark:
+
+```bash
+./benchmarks/scripts/run_benchmark.sh vllm-fp16
+```
+
+Each run produces latency percentiles, throughput, GPU utilization/memory,
+and — when a real GPU hourly cost is set in the config — a derived
+$/1M tokens figure. See `benchmarks/README.md` for the full methodology
+and `benchmarks/reports/cost-latency-tradeoff.md` for the comparison
+report format.
+
+> This scaffolding ships with the repository; the results and report
+> files are templates until benchmarks are actually executed on target
+> hardware. See `benchmarks/results/SCHEMA.md` for what a completed run
+> looks like.
+
+---
+
 ## Development Environment
 
 ```text
@@ -540,6 +592,23 @@ llm-serving-platform
 │       ├── smoke-test.js
 │       ├── load-test.js
 │       └── stress-test.js
+│
+├── benchmarks/
+│   ├── configs/
+│   │   ├── vllm-fp16.env
+│   │   └── vllm-awq.env
+│   ├── scripts/
+│   │   ├── run_benchmark.sh
+│   │   ├── quantize_model.py
+│   │   ├── build_result.py
+│   │   └── collect_gpu_metrics.sh
+│   ├── k6/
+│   │   └── benchmark-test.js
+│   ├── results/
+│   │   ├── SCHEMA.md
+│   │   └── template-result.json
+│   └── reports/
+│       └── cost-latency-tradeoff.md
 │
 ├── monitoring/
 │   ├── opentelemetry/
