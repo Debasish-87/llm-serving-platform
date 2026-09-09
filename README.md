@@ -7,7 +7,9 @@ This project focuses on the infrastructure and operational side of LLM inference
 > Project Status: Under Active Development
 
 ---
+<img width="1917" height="1008" alt="Screenshot 2026-09-09 222825" src="https://github.com/user-attachments/assets/8d10a5ad-b25c-42eb-acce-4a00461526a2" />
 
+---
 ## Goals
 
 * Serve Large Language Models using vLLM
@@ -124,6 +126,15 @@ Memory Limit:      4Gi
 
 NVIDIA GPU:        1
 ```
+
+---
+## Screenshot
+
+<img width="1912" height="147" alt="Screenshot 2026-09-09 223252" src="https://github.com/user-attachments/assets/1a4bba3f-5e85-45bd-9724-ec129a74e4ce" />
+
+<img width="1917" height="382" alt="Screenshot 2026-09-09 222751" src="https://github.com/user-attachments/assets/1d911f38-5ead-4d34-b8e1-b32e0421187e" />
+
+<img width="1902" height="945" alt="Screenshot 2026-09-09 222812" src="https://github.com/user-attachments/assets/ada7ddb2-d312-4e93-bfcd-769b2715f1e5" />
 
 ---
 
