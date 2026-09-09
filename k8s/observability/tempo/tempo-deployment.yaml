@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: tempo
+  namespace: llm-serving
+  labels:
+    app: tempo
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: tempo
+
+  template:
+    metadata:
+      labels:
+        app: tempo
+
+    spec:
+      containers:
+        - name: tempo
+
+          image: grafana/tempo:2.6.1
+
+          args:
+            - "-config.file=/etc/tempo/tempo.yaml"
+
+          ports:
+            - name: http
+              containerPort: 3200
+
+            - name: otlp-grpc
+              containerPort: 4317
+
+            - name: otlp-http
+              containerPort: 4318
+
+          volumeMounts:
+            - name: tempo-config
+              mountPath: /etc/tempo/tempo.yaml
+              subPath: tempo.yaml
+
+            - name: tempo-storage
+              mountPath: /tempo
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+      volumes:
+        - name: tempo-config
+          configMap:
+            name: tempo-config
+
+        - name: tempo-storage
+          emptyDir: {}

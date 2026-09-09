@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vllm-config
+  namespace: llm-serving
+
+data:
+  MODEL_NAME: "Qwen/Qwen2.5-0.5B-Instruct"
+
+  VLLM_HOST: "0.0.0.0"
+  VLLM_PORT: "8080"
+
+  MAX_MODEL_LEN: "2048"
+
+  GPU_MEMORY_UTILIZATION: "0.80"

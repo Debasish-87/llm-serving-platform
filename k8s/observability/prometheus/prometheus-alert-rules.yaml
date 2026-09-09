@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: prometheus-alert-rules
+  namespace: llm-serving
+
+data:
+  alerts.yml: |
+    groups:
+
+      - name: llm-serving-alerts
+
+        rules:
+
+          # vLLM target is down
+          - alert: VLLMDown
+
+            expr: up{job="vllm"} == 0
+
+            for: 2m
+
+            labels:
+              severity: critical
+
+            annotations:
+              summary: "vLLM instance is down"
+              description: "Prometheus cannot scrape the vLLM metrics endpoint for more than 2 minutes."
+
+
+          # Gateway target is down
+          - alert: GatewayDown
+
+            expr: up{job="envoy"} == 0
+
+            for: 2m
+
+            labels:
+              severity: critical
+
+            annotations:
+              summary: "LLM Gateway is down"
+              description: "Prometheus cannot scrape the Envoy gateway for more than 2 minutes."
+
+
+          # GPU memory usage above 90%
+          - alert: GPUMemoryHigh
+
+            expr: |
+              (
+                DCGM_FI_DEV_FB_USED
+                /
+                DCGM_FI_DEV_FB_TOTAL
+              ) * 100 > 90
+
+            for: 5m
+
+            labels:
+              severity: warning
+
+            annotations:
+              summary: "GPU memory usage is above 90%"
+              description: "GPU memory utilization has remained above 90% for 5 minutes."
+
+
+          # GPU is not responding to Prometheus
+          - alert: DCGMExporterDown
+
+            expr: up{job="dcgm-exporter"} == 0
+
+            for: 2m
+
+            labels:
+              severity: critical
+
+            annotations:
+              summary: "DCGM Exporter is down"
+              description: "Prometheus cannot scrape GPU metrics."
+
+
+          # High gateway 5xx error rate
+          - alert: HighGateway5xxRate
+
+            expr: |
+              sum(rate(envoy_http_downstream_rq_xx{
+                envoy_response_code_class="5"
+              }[5m]))
+              /
+              sum(rate(envoy_http_downstream_rq_total[5m]))
+              > 0.05
+
+            for: 5m
+
+            labels:
+              severity: warning
+
+            annotations:
+              summary: "High gateway 5xx error rate"
+              description: "More than 5% of gateway requests are returning 5xx errors."

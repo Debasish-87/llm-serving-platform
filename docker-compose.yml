@@ -1,0 +1,25 @@
+services:
+  vllm:
+    build:
+      context: .
+      dockerfile: docker/vllm.Dockerfile
+
+    container_name: vllm-server
+
+    ports:
+      - "${VLLM_PORT:-8000}:8000"
+
+    volumes:
+      - ${HF_CACHE_DIR:-~/.cache/huggingface}:/root/.cache/huggingface
+
+    environment:
+      HF_HOME: /root/.cache/huggingface
+
+    command:
+      - "${MODEL_NAME:-Qwen/Qwen2.5-0.5B-Instruct}"
+      - "--host"
+      - "0.0.0.0"
+      - "--port"
+      - "8000"
+
+    restart: unless-stopped

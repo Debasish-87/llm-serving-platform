@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: vllm
+  namespace: llm-serving
+  labels:
+    app: vllm
+
+spec:
+  replicas: 1
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+
+  selector:
+    matchLabels:
+      app: vllm
+
+  template:
+    metadata:
+      labels:
+        app: vllm
+
+    spec:
+      terminationGracePeriodSeconds: 120
+
+      containers:
+        - name: vllm
+
+          image: vllm/vllm-openai:latest
+
+          ports:
+            - name: http
+              containerPort: 8000
+
+          envFrom:
+            - configMapRef:
+                name: vllm-config
+
+          args:
+            - "$(MODEL_NAME)"
+            - "--host"
+            - "$(VLLM_HOST)"
+            - "--port"
+            - "$(VLLM_PORT)"
+            - "--max-model-len"
+            - "$(MAX_MODEL_LEN)"
+            - "--gpu-memory-utilization"
+            - "$(GPU_MEMORY_UTILIZATION)"
+
+          resources:
+            requests:
+              cpu: "2"
+              memory: "4Gi"
+              nvidia.com/gpu: 1
+
+            limits:
+              cpu: "4"
+              memory: "8Gi"
+              nvidia.com/gpu: 1
+
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+
+            failureThreshold: 30
+            periodSeconds: 10
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+
+            periodSeconds: 10
+            failureThreshold: 3
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+
+            periodSeconds: 20
+            failureThreshold: 3

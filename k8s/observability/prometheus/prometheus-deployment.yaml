@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: prometheus
+  namespace: llm-serving
+  labels:
+    app: prometheus
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: prometheus
+
+  template:
+    metadata:
+      labels:
+        app: prometheus
+
+    spec:
+      containers:
+        - name: prometheus
+
+          image: prom/prometheus:v2.54.1
+
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--storage.tsdb.path=/prometheus"
+
+          ports:
+            - name: http
+              containerPort: 9090
+
+          volumeMounts:
+            # Main Prometheus configuration
+            - name: prometheus-config
+              mountPath: /etc/prometheus/prometheus.yml
+              subPath: prometheus.yml
+
+            # Alert rules
+            - name: prometheus-alert-rules
+              mountPath: /etc/prometheus/alerts.yml
+              subPath: alerts.yml
+
+            # Prometheus TSDB storage
+            - name: prometheus-storage
+              mountPath: /prometheus
+
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+
+      volumes:
+        # Main configuration
+        - name: prometheus-config
+          configMap:
+            name: prometheus-config
+
+        # Alert rules configuration
+        - name: prometheus-alert-rules
+          configMap:
+            name: prometheus-alert-rules
+
+        # Local storage
+        - name: prometheus-storage
+          emptyDir: {}

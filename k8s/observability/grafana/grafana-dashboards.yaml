@@ -1,0 +1,200 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: grafana-dashboards
+  namespace: llm-serving
+
+data:
+  gpu-overview.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "panels": [
+        {
+          "id": 1,
+          "title": "GPU Utilization",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "DCGM_FI_DEV_GPU_UTIL",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "GPU Memory Used",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "DCGM_FI_DEV_FB_USED",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "GPU Temperature",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "DCGM_FI_DEV_GPU_TEMP",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "title": "GPU Power Usage",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "DCGM_FI_DEV_POWER_USAGE",
+              "refId": "A"
+            }
+          ]
+        }
+      ],
+      "schemaVersion": 39,
+      "title": "GPU Overview",
+      "version": 1
+    }
+
+  vllm-overview.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "panels": [
+        {
+          "id": 10,
+          "title": "vLLM Request Rate",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "rate(vllm:num_requests_running[1m])",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 11,
+          "title": "Running Requests",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "vllm:num_requests_running",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 12,
+          "title": "Waiting Requests",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "vllm:num_requests_waiting",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 13,
+          "title": "Prompt Token Throughput",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "vllm:prompt_tokens_total",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 14,
+          "title": "Generation Token Throughput",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "vllm:generation_tokens_total",
+              "refId": "A"
+            }
+          ]
+        }
+      ],
+      "schemaVersion": 39,
+      "title": "vLLM Serving Overview",
+      "version": 1
+    }
+
+  envoy-overview.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "panels": [
+        {
+          "id": 20,
+          "title": "Gateway Request Rate",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "sum(rate(envoy_http_downstream_rq_total[1m]))",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 21,
+          "title": "Gateway 4xx Errors",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "sum(rate(envoy_http_downstream_rq_xx{envoy_response_code_class=\"4\"}[1m]))",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 22,
+          "title": "Gateway 5xx Errors",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "sum(rate(envoy_http_downstream_rq_xx{envoy_response_code_class=\"5\"}[1m]))",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 23,
+          "title": "Upstream Requests",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "sum(rate(envoy_cluster_upstream_rq_total[1m]))",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 24,
+          "title": "Upstream 5xx Errors",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "sum(rate(envoy_cluster_upstream_rq_xx{envoy_response_code_class=\"5\"}[1m]))",
+              "refId": "A"
+            }
+          ]
+        }
+      ],
+      "schemaVersion": 39,
+      "title": "LLM Gateway Overview",
+      "version": 1
+    }

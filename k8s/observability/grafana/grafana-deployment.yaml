@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: grafana
+  namespace: llm-serving
+  labels:
+    app: grafana
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: grafana
+
+  template:
+    metadata:
+      labels:
+        app: grafana
+
+    spec:
+      containers:
+        - name: grafana
+
+          image: grafana/grafana:11.2.0
+
+          ports:
+            - name: http
+              containerPort: 3000
+
+          volumeMounts:
+            # Prometheus datasource
+            - name: grafana-datasource
+              mountPath: /etc/grafana/provisioning/datasources/datasource.yaml
+              subPath: datasource.yaml
+
+            # Dashboard provisioning configuration
+            - name: grafana-dashboard-provider
+              mountPath: /etc/grafana/provisioning/dashboards/dashboards.yaml
+              subPath: dashboards.yaml
+
+            # Dashboard JSON files
+            - name: grafana-dashboards
+              mountPath: /opt/grafana-dashboards
+
+            # Grafana internal data
+            - name: grafana-storage
+              mountPath: /var/lib/grafana
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+      volumes:
+        - name: grafana-datasource
+          configMap:
+            name: grafana-datasource
+
+        - name: grafana-dashboard-provider
+          configMap:
+            name: grafana-dashboard-provider
+
+        - name: grafana-dashboards
+          configMap:
+            name: grafana-dashboards
+
+        - name: grafana-storage
+          emptyDir: {}

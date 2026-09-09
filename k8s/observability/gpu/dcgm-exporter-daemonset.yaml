@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: DaemonSet
+
+metadata:
+  name: dcgm-exporter
+  namespace: llm-serving
+  labels:
+    app: dcgm-exporter
+
+spec:
+  selector:
+    matchLabels:
+      app: dcgm-exporter
+
+  template:
+    metadata:
+      labels:
+        app: dcgm-exporter
+
+    spec:
+      containers:
+        - name: dcgm-exporter
+
+          image: nvcr.io/nvidia/k8s/dcgm-exporter:3.3.8-3.6.0-ubuntu22.04
+
+          ports:
+            - name: metrics
+              containerPort: 9400
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+
+          securityContext:
+            capabilities:
+              add:
+                - SYS_ADMIN
+
+      tolerations:
+        - operator: Exists

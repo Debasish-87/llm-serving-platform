@@ -1,0 +1,71 @@
+nameOverride: ""
+
+fullnameOverride: ""
+
+replicaCount: 1
+
+image:
+  repository: vllm/vllm-openai
+  tag: latest
+  pullPolicy: IfNotPresent
+
+model:
+  name: Qwen/Qwen2.5-0.5B-Instruct
+
+service:
+  type: ClusterIP
+  port: 8000
+
+resources:
+  requests:
+    cpu: "1"
+    memory: "2Gi"
+
+  limits:
+    cpu: "2"
+    memory: "4Gi"
+    gpu: 1
+
+vllm:
+  gpuMemoryUtilization: 0.8
+  maxModelLen: 1024
+  maxNumSeqs: 2
+
+probes:
+  startup:
+    path: /health
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    failureThreshold: 60
+
+  readiness:
+    path: /health
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    failureThreshold: 3
+
+  liveness:
+    path: /health
+    initialDelaySeconds: 30
+    periodSeconds: 20
+    failureThreshold: 3
+
+terminationGracePeriodSeconds: 120
+
+strategy:
+  type: RollingUpdate
+
+  rollingUpdate:
+    maxUnavailable: 0
+    maxSurge: 1
+
+securityContext:
+  pod:
+    runAsNonRoot: true
+
+  container:
+    allowPrivilegeEscalation: false
+
+    capabilities:
+      drop:
+        - ALL

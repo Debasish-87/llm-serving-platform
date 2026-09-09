@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: loki
+  namespace: llm-serving
+  labels:
+    app: loki
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: loki
+
+  template:
+    metadata:
+      labels:
+        app: loki
+
+    spec:
+      containers:
+        - name: loki
+
+          image: grafana/loki:3.1.1
+
+          ports:
+            - name: http
+              containerPort: 3100
+
+          args:
+            - "-config.file=/etc/loki/config.yaml"
+
+          volumeMounts:
+            - name: loki-config
+              mountPath: /etc/loki/config.yaml
+              subPath: config.yaml
+
+            - name: loki-storage
+              mountPath: /loki
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+      volumes:
+        - name: loki-config
+          configMap:
+            name: loki-config
+
+        - name: loki-storage
+          emptyDir: {}
