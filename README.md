@@ -4,11 +4,11 @@ A production-style GPU-based LLM serving platform built to understand how Large 
 
 This project focuses on the infrastructure and operational side of LLM inference using **vLLM, Kubernetes, NVIDIA GPUs, Envoy, Prometheus, Grafana, Loki, OpenTelemetry, Tempo, Alertmanager, Helm, and k6**.
 
-> 🚧 **Project Status: Under Active Development**
+> Project Status: Under Active Development
 
 ---
 
-## 🎯 Goals
+## Goals
 
 * Serve Large Language Models using vLLM
 * Run inference workloads on NVIDIA GPUs
@@ -27,7 +27,7 @@ This project focuses on the infrastructure and operational side of LLM inference
 
 ---
 
-# 🏗️ Architecture
+## Architecture
 
 ```text
                               ┌───────────────┐
@@ -64,7 +64,7 @@ This project focuses on the infrastructure and operational side of LLM inference
 
 ---
 
-# 🔄 Request Flow
+## Request Flow
 
 ```text
 Client
@@ -94,7 +94,7 @@ Client
 
 ---
 
-# ⚙️ vLLM Serving Configuration
+## vLLM Serving Configuration
 
 Current model configuration:
 
@@ -126,7 +126,7 @@ NVIDIA GPU:        1
 
 ---
 
-# ☸️ Kubernetes Architecture
+## Kubernetes Architecture
 
 The platform runs inside the `llm-serving` Kubernetes namespace.
 
@@ -163,7 +163,7 @@ Kubernetes Cluster
 
 ---
 
-# 📊 Monitoring Architecture
+## Monitoring Architecture
 
 ```text
 vLLM ────────────────┐
@@ -193,7 +193,7 @@ Grafana provides visualization for:
 
 ---
 
-# 📝 Logging Architecture
+## Logging Architecture
 
 ```text
 Kubernetes Pods
@@ -213,7 +213,7 @@ Fluent Bit collects logs from Kubernetes workloads and forwards them to Loki for
 
 ---
 
-# 🔍 Distributed Tracing
+## Distributed Tracing
 
 ```text
 Application / Gateway
@@ -233,7 +233,7 @@ The tracing stack is intended to provide visibility into request flow and latenc
 
 ---
 
-# 🚨 Alerting Architecture
+## Alerting Architecture
 
 ```text
 Prometheus Metrics
@@ -252,7 +252,7 @@ The platform includes alerting components for detecting operational issues and a
 
 ---
 
-# 🔄 Deployment Strategy
+## Deployment Strategy
 
 The vLLM Deployment uses a Rolling Update strategy.
 
@@ -285,11 +285,11 @@ Kubernetes Rolling Update
            Old Pod Removed
 ```
 
-> ⚠️ GPU workloads require careful rollout planning because `maxSurge: 1` may require additional GPU capacity during deployment.
+> Note: GPU workloads require careful rollout planning because `maxSurge: 1` may require additional GPU capacity during deployment.
 
 ---
 
-# ❤️ Health Checks
+## Health Checks
 
 The vLLM Deployment includes:
 
@@ -307,7 +307,7 @@ Allows Kubernetes to restart the container if it becomes unhealthy.
 
 ---
 
-# 🔐 Security
+## Security
 
 The vLLM workload currently includes container security hardening:
 
@@ -328,7 +328,7 @@ terminationGracePeriodSeconds: 120
 
 ---
 
-# 📦 Helm Deployment
+## Helm Deployment
 
 The project includes a Helm chart for packaging and deploying the vLLM serving workload.
 
@@ -373,7 +373,7 @@ helm template test-release ./helm/vllm-serving
 
 ---
 
-# 🧪 Load Testing
+## Load Testing
 
 The platform includes k6-based performance tests.
 
@@ -413,7 +413,7 @@ Pushes the system beyond expected traffic levels to identify bottlenecks and fai
 
 ---
 
-# 🐳 Development Environment
+## Development Environment
 
 ```text
 Host System
@@ -428,7 +428,7 @@ Host System
 
 ---
 
-# 🚀 Runtime Environment
+## Runtime Environment
 
 ```text
 Docker
@@ -459,7 +459,7 @@ Kubernetes
 
 ---
 
-# 📁 Project Structure
+## Project Structure
 
 ```text
 llm-serving-platform
@@ -478,46 +478,62 @@ llm-serving-platform
 │       └── templates/
 │
 ├── k8s/
-│   ├── namespace.yaml
+│   ├── base/
+│   │   ├── configmap.yaml
+│   │   └── namespace.yaml
 │   │
-│   ├── deployment.yaml
-│   ├── service.yaml
+│   ├── gateway/
+│   │   ├── envoy-config.yaml
+│   │   ├── gateway-deployment.yaml
+│   │   └── gateway-service.yaml
 │   │
-│   ├── gateway-deployment.yaml
-│   ├── gateway-service.yaml
-│   ├── envoy-config.yaml
+│   ├── observability/
+│   │   ├── alertmanager/
+│   │   │   ├── alertmanager-config.yaml
+│   │   │   ├── alertmanager-deployment.yaml
+│   │   │   └── alertmanager-service.yaml
+│   │   │
+│   │   ├── fluent-bit/
+│   │   │   ├── fluent-bit-config.yaml
+│   │   │   ├── fluent-bit-daemonset.yaml
+│   │   │   ├── fluent-bit-rbac.yaml
+│   │   │   └── fluent-bit-serviceaccount.yaml
+│   │   │
+│   │   ├── gpu/
+│   │   │   ├── dcgm-exporter-daemonset.yaml
+│   │   │   └── dcgm-exporter-service.yaml
+│   │   │
+│   │   ├── grafana/
+│   │   │   ├── grafana-dashboard-provider.yaml
+│   │   │   ├── grafana-dashboards.yaml
+│   │   │   ├── grafana-datasource.yaml
+│   │   │   ├── grafana-deployment.yaml
+│   │   │   └── grafana-service.yaml
+│   │   │
+│   │   ├── loki/
+│   │   │   ├── loki-config.yaml
+│   │   │   ├── loki-deployment.yaml
+│   │   │   └── loki-service.yaml
+│   │   │
+│   │   ├── otel/
+│   │   │   ├── otel-collector-config.yaml
+│   │   │   ├── otel-collector-deployment.yaml
+│   │   │   └── otel-collector-service.yaml
+│   │   │
+│   │   ├── prometheus/
+│   │   │   ├── prometheus-alert-rules.yaml
+│   │   │   ├── prometheus-config.yaml
+│   │   │   ├── prometheus-deployment.yaml
+│   │   │   └── prometheus-service.yaml
+│   │   │
+│   │   └── tempo/
+│   │       ├── tempo-config.yaml
+│   │       ├── tempo-deployment.yaml
+│   │       └── tempo-service.yaml
 │   │
-│   ├── prometheus-config.yaml
-│   ├── prometheus-deployment.yaml
-│   ├── prometheus-service.yaml
-│   │
-│   ├── grafana-deployment.yaml
-│   ├── grafana-service.yaml
-│   ├── grafana-datasource.yaml
-│   ├── grafana-dashboards.yaml
-│   │
-│   ├── loki-config.yaml
-│   ├── loki-deployment.yaml
-│   ├── loki-service.yaml
-│   │
-│   ├── fluent-bit-config.yaml
-│   ├── fluent-bit-daemonset.yaml
-│   │
-│   ├── dcgm-exporter-daemonset.yaml
-│   ├── dcgm-exporter-service.yaml
-│   │
-│   ├── otel-collector-config.yaml
-│   ├── otel-collector-deployment.yaml
-│   ├── otel-collector-service.yaml
-│   │
-│   ├── tempo-config.yaml
-│   ├── tempo-deployment.yaml
-│   ├── tempo-service.yaml
-│   │
-│   ├── prometheus-alert-rules.yaml
-│   ├── alertmanager-config.yaml
-│   ├── alertmanager-deployment.yaml
-│   └── alertmanager-service.yaml
+│   └── serving/
+│       ├── deployment.yaml
+│       └── service.yaml
 │
 ├── load-tests/
 │   └── k6/
@@ -526,14 +542,17 @@ llm-serving-platform
 │       └── stress-test.js
 │
 ├── monitoring/
-│   ├── prometheus/
-│   └── opentelemetry/
+│   ├── opentelemetry/
+│   └── prometheus/
+│       └── prometheus.yml
 │
 ├── docs/
 │   └── performance/
 │       └── vllm-tuning.md
 │
 ├── scripts/
+│   ├── deploy/
+│   │   └── deploy.sh
 │   ├── setup/
 │   └── test/
 │
@@ -544,7 +563,7 @@ llm-serving-platform
 
 ---
 
-# 🛠️ Core Technologies
+## Core Technologies
 
 | Technology    | Purpose                          |
 | ------------- | -------------------------------- |
@@ -566,7 +585,7 @@ llm-serving-platform
 
 ---
 
-# 🎓 What This Project Demonstrates
+## What This Project Demonstrates
 
 This project is designed to demonstrate practical understanding of:
 
@@ -585,7 +604,7 @@ This project is designed to demonstrate practical understanding of:
 
 ---
 
-# 🚀 Getting Started
+## Getting Started
 
 Validate the Helm chart:
 
@@ -615,7 +634,7 @@ nvidia-smi
 
 ---
 
-# 🧠 Key Learning Focus
+## Key Learning Focus
 
 The goal of this project is not just to deploy an LLM.
 
